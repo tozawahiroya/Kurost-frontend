@@ -1,0 +1,23 @@
+.button-container {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .button {
+    background-color: #516C8D;
+    color: white;
+    padding: 10px;
+    margin: 10px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .button.active {
+    background-color: #CCCCCC;
+  }
+  
+  .button:disabled {
+    cursor: not-allowed;
+  }
+  
+  

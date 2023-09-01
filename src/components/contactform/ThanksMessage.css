@@ -1,0 +1,26 @@
+.container-message {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+.twitter-icon {
+    color: var(--twitter-color);
+    font-size: 30px !important;
+    margin-top: 30px;
+    margin-right: 10px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.tweet-button {
+    background-color: var(--twitter-color)!important; 
+    color: #fff; 
+    border-color: var(--twitter-color);
+    border-radius: 30px !important;
+    font-size: 10px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
