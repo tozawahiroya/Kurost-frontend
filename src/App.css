@@ -24,6 +24,26 @@
   color: white;
 }
 
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  height: 100vh; /* 画面の高さ全体を使用 */
+  gap: 20px; /* div要素間のスペースを追加 */
+}
+
+.leftSection {
+  flex: 1; /* 左右のセクションが均等になるようにする */
+  display: flex; /* Flexboxを使用する */
+  flex-direction: column; /* 子要素を縦並びにする */
+  gap: 20px; /* div要素間のスペースを追加 */
+}
+
+.rightSection {
+  flex: 1;
+}
+
+
 .App-link {
   color: #61dafb;
 }

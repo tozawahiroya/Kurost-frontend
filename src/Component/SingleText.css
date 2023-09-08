@@ -1,0 +1,15 @@
+.h2Style {
+    border: 1px solid black;
+    padding: 10px;
+    max-width: 80%;
+    margin: 0 auto;
+    text-align: center;
+
+    /* Flexboxを使って中央寄せ */
+    display: flex;
+    justify-content: center; /* 水平方向中央寄せ */
+    align-items: center;     /* 垂直方向中央寄せ */
+
+    /* h2要素の高さを指定 */
+    height: 30px;           /* 高さは必要に応じて調整してください */
+}

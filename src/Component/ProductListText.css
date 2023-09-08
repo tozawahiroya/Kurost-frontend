@@ -1,0 +1,18 @@
+.productListContainer {
+    border: 1px solid #000;  /* 線の色と太さを指定 */
+    padding: 20px;          /* 内部の余白を指定 */
+    width: 80%;             /* 任意の幅を指定。ここでは80%としていますが、固定のピクセル数や他の単位でもOK */
+    height: 150px;      /* 10行程度の高さを指定。必要に応じて調整してください */
+    overflow-y: auto;       /* 縦方向のスクロールを可能にする */
+    margin: 20px auto;      /* 上下のマージンを20px、左右を自動にして中央寄せ */
+  }
+  
+.productListContainer ul {
+    list-style-type: none; /* リストのマーカー（点や数字など）を削除 */
+    padding-left: 0;       /* 左のパディングをリセット */
+    margin: 0;             /* マージンをリセット */
+}
+
+.productListContainer ul li {
+    font-size: 14px;       /* 文字サイズを16pxに設定 */
+}
