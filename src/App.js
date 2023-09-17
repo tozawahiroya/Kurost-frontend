@@ -22,11 +22,15 @@ function App() {
   const[PRD_ID,setPRD_ID]=useState()
   const[PRD_NAME,setPRD_NAME]=useState("")
   const[PRD_PRICE,setPRD_PRICE]=useState()
+
+  //時刻、時間差
+  const[time1,setTime1]=useState(null)
+  const[time2,setTime2]=useState(null)
+  const[timeDef,setTimeDef]=useState(null)
  
 
   // APIのResponse格納
   const [API1_res, setAPI1_res] = useState({})
-  const [API2_res, setAPI2_res] = useState({})
   const [singleProduct, setSingleProduct] = useState({})
   const [Item, setItem] = useState({})
 
@@ -80,60 +84,83 @@ function App() {
     }
   }, [EMP_CD]);
 
+  //バーコードの値をクエリパラメータとする/////////////////////////////////////////
+  const handle1URL = `http://127.0.0.1:8000/products`
+
+
+  useEffect(() => {
+
+    const handle1URL = `http://127.0.0.1:8000/products`
+    fetch(handle1URL)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setAPI1_res(data);
+      })
+      .catch((error) => {
+        console.error('There was a problem with the fetch operation:', error.message);
+      });
+
+  }, []); 
+
+  useEffect(() => {
+    setTimeDef((time2 - time1) / 1000); // 時間差（＝応答速度）を秒単位で記録
+  }, [time2]); 
+
   
   // Button1の操作
   const handle1ButtonClick = () => {
-    //バーコードの値をクエリパラメータとする/////////////////////////////////////////
-    const handle1URL = `http://127.0.0.1:8000/productcode/${productCode}`
+    setTime1(new Date())
+    console.log(time1)
+    const searchItem = API1_res.products.find(item => item.PRD_CODE === productCode);
 
-    if (!error && productCode !== "") {
-
-
-      fetch(handle1URL)
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return res.json();
-        })
-        .then((data) => {
-          // console.log(data); // 確認のため取得したデータをコンソールに表示
-      
-          // FastAPIから返されたデータが空のオブジェクトでないか確認
-          if (Object.keys(data).length !== 0) {
-            // APIの結果をsetAPI2_resで設定
-            // setAPI1_res(data)
-      
-            // singleProductステートの更新
-            setSingleProduct({
-              PRD_NAME: data.PRD_NAME,
-              PRD_PRICE: data.PRD_PRICE,
-              Amount: 1,
-              total_price: data.PRD_PRICE
-            });
-      
-            // itemステートの更新もdataを使用して更新
-            setItem({
-              PRD_ID: data.PRD_ID,
-              PRD_CODE: productCode,
-              PRD_NAME: data.PRD_NAME,
-              PRD_PRICE: data.PRD_PRICE
-            });
-      
-            setError(''); // エラー状態をクリア
-      
-          } else {
-            // エラーメッセージを設定して、再度正しいProductCodeの入力を促す
-            setError('存在しないProductCodeです。正しいProductCodeを入力してください。');
-          }
-        })
-        .catch((error) => {
-          console.log('There was a problem with the fetch operation:', error.message);
-        });
-      
-    
+    if (!searchItem) {
+      setError('存在しないProductCodeです。正しいProductCodeを入力してください。')
     }
-  };
+  
+    else {
+      console.log(searchItem.PRD_NAME)
+
+      setSingleProduct({
+        PRD_NAME: searchItem.PRD_NAME,
+        PRD_PRICE: searchItem.PRD_PRICE,
+        Amount: 1,
+        total_price: searchItem.PRD_PRICE
+      });
+        
+            //   // itemステートの更新もsearchItemを使用して更新
+      setItem({
+        PRD_ID: searchItem.PRD_ID,
+        PRD_CODE: productCode,
+        PRD_NAME: searchItem.PRD_NAME,
+        PRD_PRICE: searchItem.PRD_PRICE
+      });
+    };
+          // // console.log(data); // 確認のため取得したデータをコンソールに表示
+      
+          // // FastAPIから返されたデータが空のオブジェクトでないか確認
+          // if (Object.keys(data).length !== 0) {
+          //   // APIの結果をsetAPI2_resで設定
+          //   // setAPI1_res(data)
+      
+          //   // singleProductステートの更新
+
+      
+          //   setError(''); // エラー状態をクリア
+      
+          // } else {
+          //   // エラーメッセージを設定して、再度正しいProductCodeの入力を促す
+          //   setError('存在しないProductCodeです。正しいProductCodeを入力してください。');
+          // }
+
+
+    
+  }
+
 
   const handle2ButtonClick = () => {
     if (!singleProduct.PRD_PRICE == "") {
@@ -181,8 +208,6 @@ function App() {
       // setTotalPrice(50000000000000)
     }
 
-    
-  
     return (
       <div className="App">
         <div className="leftSection">
@@ -202,8 +227,9 @@ function App() {
           </div>
   
           <div>
-            <SingleText text={singleProduct.PRD_NAME} title={"商品名"} />
-            <SingleText text={singleProduct.PRD_PRICE} title={"単価"} />
+            <SingleText text={singleProduct.PRD_NAME} title={"商品名"} setTime2={setTime2}/>
+            <SingleText text={singleProduct.PRD_PRICE} title={"単価"} setTime2={setTime2}/>
+            <p>時間差は {timeDef}</p>
             <Button onClick={handle2ButtonClick}>
               追加
             </Button>
