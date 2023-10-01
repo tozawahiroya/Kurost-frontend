@@ -100,6 +100,7 @@ function App() {
       })
       .then((data) => {
         setAPI1_res(data);
+        console.log(data);
       })
       .catch((error) => {
         console.error('There was a problem with the fetch operation:', error.message);
@@ -211,6 +212,7 @@ function App() {
     return (
       <div className="App">
         <div className="leftSection">
+          <p>Type2：Frontに全商品マスタ読み込み</p>
           <div>
             <p>レジ担当者コード</p>
             <input type="text" value={EMP_CD} onChange={handleChangetext2} />
