@@ -4,6 +4,7 @@ import ProductListText from './Component/ProductListText';
 import SingleText from './Component/SingleText';
 import Button from '@mui/material/Button';
 import React, { useState, useRef, useEffect } from 'react';
+import Quagga from "quagga";
 
 
 function App() {
@@ -87,7 +88,7 @@ function App() {
   //バーコードの値をクエリパラメータとする/////////////////////////////////////////
   const handle1URL = `http://127.0.0.1:8000/products`
 
-
+  // 一回だけ読み込む
   useEffect(() => {
 
     const handle1URL = `http://127.0.0.1:8000/products`
@@ -203,30 +204,141 @@ function App() {
         .catch(error => console.error('An error occurred:', error));
         
           setProductList([])
+          setitems([])
+          console.log(API_POST)
       }
       //API2（戻り値：合計学）
 
       // setTotalPrice(50000000000000)
     }
 
+    //追加分//
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+    const [selectedTab, setSelectedTab] = useState(null);
+    const [barcode,setBarcode] = useState("") // バーコードの値
+    const [savedImage, setSavedImage] = useState(""); // スキャンした時のバーコード画像
+    const [cameraActive, setCameraActive] = useState(false);  // 写真入力を判定する
+ 
+
+    // Quagga初期化のおまじない
+    const startCamera = () => {
+      const config = {
+        inputStream: {
+          name : "Live",
+          type : "LiveStream",        
+          target: '#preview',
+          size: 700,
+          singleChannel: false
+        },
+        locator: {
+          patchSize: "midium",
+          halfSample: false
+        },
+        decoder: {
+          readers: [{
+            format: "ean_reader",
+            config: {}
+          }]
+        },
+        numOfWorker: navigator.hardwareConcurrency || 4,
+        locate: true,
+        src: null
+      };
+
+      Quagga.init(config, function(err) {
+          if (err) {
+              console.log(err);
+              return;
+          }
+          Quagga.start();
+        });
+    };
+
+    useEffect(() => {
+        //Quaggaライブラリでバーコードが検出されたら実行される関数。引数のresultには検出情報が含まれる。
+        Quagga.onDetected(result => {
+          if (result !== undefined){
+            setBarcode(result.codeResult.code);
+            setProductCode(result.codeResult.code)
+            const canvas = Quagga.canvas.dom.image;
+            const imgSrc = canvas.toDataURL();  // Base64形式
+            // このimgSrcをどこかのuseStateに保存して、後で表示する
+            setSavedImage(imgSrc);
+
+            Quagga.stop();  // ここでカメラを停止
+            setCameraActive(false);  // カメラの状態をアップデート
+              }
+          });
+        // カメラがアクティブなら起動
+        if (cameraActive) {
+            setBarcode("スキャン中")
+            setSavedImage("");
+            startCamera();
+        }
+        if(selectedTab == "manual") {
+          Quagga.stop();
+        }
+    }, [cameraActive]);
+
+    // 簡易なログイン機能の実装
+    const [password, setPassword] = useState('');
+    const [loggedIn, setLoggedIn] = useState(false);
+    const [loginError, setLoginError] = useState('');
+  
+    const correctPassword = '9999999999'; 
+    const handleLogin = () => {
+      if (password === correctPassword) {
+        setLoggedIn(true);
+        setError('');
+        setEMP_CD(password)
+      } else {
+        setLoginError('パスワードが異なります。');
+      }
+    };
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
     return (
       <div className="App">
         <div className="leftSection">
           <p>Type2：Frontに全商品マスタ読み込み</p>
+
+          {/* ログイン機能追加部分 */}
+          {loggedIn ?(
           <div>
             <p>レジ担当者コード</p>
             <input type="text" value={EMP_CD} onChange={handleChangetext2} />
             {error2 && <p style={{ color: 'red' }}>{error2}</p>}
-          </div>
-  
-          <div>
+
             <p>商品コード入力</p>
-            <input type="text" value={productCode} onChange={handleChangetext1} />
+            <input type="text" value={productCode} onChange={handleChangetext1} placeholder="ここに手動入力する or 写真入力を選択" style={{width: "300px"}}/>
             {error && <p style={{ color: 'red' }}>{error}</p>}
+
+            {/* 写真入力追加部分 */}
+            <div>
+              <button onClick={() => {setSelectedTab('photo'); setCameraActive(true); }}>写真入力開始</button>
+              <button onClick={() => {setSelectedTab('manual'); setCameraActive(false);}}>写真入力終了</button>
+            </div>
+            {/* 追加ここまで */}
+
             <Button onClick={handle1ButtonClick}>
               商品コードの追加読み込み
             </Button>
           </div>
+          ):(
+          <div>
+            <h2>ログインが必要です</h2>
+              <input
+                type="password"
+                placeholder="パスワード"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button onClick={handleLogin}>ログイン</button>
+              {loginError && <p>{loginError}</p>}
+          </div>
+          )}
+          {/* 追加ここまで */}
   
           <div>
             <SingleText text={singleProduct.PRD_NAME} title={"商品名"} setTime2={setTime2}/>
@@ -264,11 +376,24 @@ function App() {
                 null
             }
           </div>
+          {/* カメラ起動用追加部分 */}
+          {selectedTab === 'photo' && (
+              <div>
+                {barcode !== "" ? `バーコード：${barcode}` : "スキャン中"}
+                {/* 写真入力を押したら、カメラ起動する */}
+                {cameraActive && (<div id="preview"></div>)}
+              </div>
+            )}
+            {selectedTab === null && (
+              <div>
+                
+              </div>
+            )}
+            {savedImage && <img src={savedImage} width="300" height="300" />}
+          {/* 追加部分ここまで */}
         </div>
       </div>
-  );
-  
-  
+    )
 }
 
 export default App;
